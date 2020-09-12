@@ -5,23 +5,15 @@ import ActivityStore from '../../../app/stores/activityStore';
 import {observer} from 'mobx-react-lite';
 
 
-
-interface IProps {
-}
-
-
-
-const ActivityList: React.FC<IProps> = () => {
+const ActivityList: React.FC = () => {
 
     const activityStore = useContext(ActivityStore);
-
-
 
     return (
         <Segment clearing>
         <Item.Group divided>
 
-        {activityStore.activityList.map((activity)=>(
+        {activityStore.activityListByDate.map((activity)=>(
             <Item key={activity.id}>
                 <Item.Content>
                     <Item.Header as='a'>{activity.title}</Item.Header>

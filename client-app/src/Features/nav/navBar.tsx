@@ -25,7 +25,7 @@ const NavBar:React.FC<IProps> = () => {
                 </Menu.Item>
                 <Menu.Item name='Activities' />
                 <Menu.Item>
-                    <Button positive content='Create Activity' onClick={() => activityStore.handleOpenCreateForm()}></Button>
+                    <Button positive content='Create Activity' onClick={() => activityStore.handleOpenCreateForm(null)}></Button>
                 </Menu.Item>
             </Container>
       </Menu>

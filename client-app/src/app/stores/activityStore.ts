@@ -1,10 +1,16 @@
 import { createContext } from "react";
-import {observable, action} from 'mobx';
+import {observable, action, computed, configure, runInAction} from 'mobx';
 import { IActivity } from "../models/activity";
 import agent from "../api/agent";
+import { v4 as uuid } from 'uuid';
+
+
+configure({enforceActions: "always"});
+
 
 class ActivityStore { 
-    //
+    
+    @observable activityRegistry = new Map<string,IActivity>();
     @observable activityList:IActivity[] = [];
     @observable initialLoading = true;
     @observable editMode = false;
@@ -12,87 +18,123 @@ class ActivityStore {
     @observable submmittingButtonId: string | null = null;
     @observable isFormSubmit: boolean = false;
 
-    @action loadActivities = () => {
-         agent.Activities.list().then((res)=>{
+    @computed get activityListByDate() {
+      return Array.from(this.activityRegistry.values()).sort( (a, b) => { return Date.parse(a.date) - Date.parse(b.date); });
+    }
+
+    @action loadActivities = async () => {
+        try {
+          const res = await agent.Activities.list();
+          runInAction(()=>{
             res.forEach(activity => 
               { 
                 activity.date = activity.date.split('.')[0];
-                this.activityList.push( activity );
+                this.activityRegistry.set(activity.id, activity);
               });
-            
+          });
+        }
+        catch (err) {
+          console.log(err);
+        }
+        finally {
+          runInAction(()=>{
             this.initialLoading = false;
-           }
-        )        
+          });
+        }
     }
 
     @action handleSelectActivity = (activityId: string) => {
-        let result = this.activityList.filter((a)=>(a.id === activityId))[0];
-        this.selectedActivity = result;
+        this.selectedActivity = this.activityRegistry.get(activityId) || null;
         this.editMode = false;
     } 
 
       
-      //
-      @action handleOpenCreateForm = () => {
-        this.editMode = true;
-        this.selectedActivity = null;
-      }
+    @action handleOpenCreateForm = (activity: IActivity | null) => {
+      this.editMode = true;
+      this.selectedActivity = activity;
+    }
 
 
 
-      @action handleDeleteActivity = (e: React.MouseEvent<HTMLButtonElement,MouseEvent>, activityId: string) => {
-        this.submmittingButtonId = e.currentTarget.name;
-        agent.Activities.delete(activityId).then(()=>{
-          this.activityList = [...this.activityList.filter((a)=>(a.id !== activityId))];
+    @action handleDeleteActivity = async (e: React.MouseEvent<HTMLButtonElement,MouseEvent>, activityId: string) => {
+      this.submmittingButtonId = e.currentTarget.name;
+      try {
+        await agent.Activities.delete(activityId);
+        runInAction(()=>{
+          this.activityRegistry.delete(activityId);
           this.submmittingButtonId = null;
         });
       }
- 
-  
-      @action handleCreateActivity = (activity: IActivity) => {
-        this.isFormSubmit = true;        
-        
-        agent.Activities.create(activity).then(()=> {
-          this.activityList = [...this.activityList, activity];
+      catch (err) {
+        console.log(err);
+      }
+    }
+
+
+    @action handleCreateActivity = (activity: IActivity) => {
+      this.isFormSubmit = true;        
+      
+      agent.Activities.create(activity).then(()=> {
+        runInAction(()=>{
+          this.activityRegistry.set(activity.id, activity);
           this.selectedActivity = activity;
           this.editMode = false;
           this.isFormSubmit = false;          
         });
+      });
 
+    }
+
+    @action handleEditActivity = (activity: IActivity) => {
+      this.isFormSubmit = true;        
+
+      agent.Activities.update(activity).then(()=>{
+        this.activityList = [...this.activityList.filter(a=>a.id !== activity.id), activity];
+        this.selectedActivity = activity;
+        this.editMode = false;
+        this.isFormSubmit = false;
+      });
+    }
+
+    @action initActivity = () => {
+      if (!this.selectedActivity) 
+          this.selectedActivity = {
+              id: '',
+              title: '',
+              description: '',
+              category: '',
+              date: '',
+              city: '',
+              venue: ''
       }
-  
-      @action handleEditActivity = (activity: IActivity) => {
-        this.isFormSubmit = true;        
+    }
 
-        agent.Activities.update(activity).then(()=>{
-          this.activityList = [...this.activityList.filter(a=>a.id !== activity.id), activity];
-          this.selectedActivity = activity;
-          this.editMode = false;
-          this.isFormSubmit = false;
-        });
-      }
+    @action handleFormCancellation = () => {
+      this.selectedActivity = null; 
+      this.editMode = false;
+    }
 
-      @action initActivity = () => {
-        if (this.selectedActivity) 
-            return this.selectedActivity;
+
+
+    @action handleInputChange = (ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const {name, value} = ev.currentTarget;
+      this.selectedActivity = {...this.selectedActivity!, [name]: value};
+   }
+
+    @action handleFormSubmittion = () => {
+
+        if (this.selectedActivity!.id)
+        {
+            this.handleEditActivity(this.selectedActivity!);
+        }
         else
         {
-            return {
-                id: '',
-                title: '',
-                description: '',
-                category: '',
-                date: '',
-                city: '',
-                venue: ''
-            }
+            const newActivity = {...this.selectedActivity!, id: uuid() }
+            this.handleCreateActivity(newActivity);
         }
-      }
 
-      @action handleFormCancellation = () => {
-        this.selectedActivity = null; 
-        this.editMode = false;
-      }
+        this.selectedActivity = null;
+    }
 
 
 

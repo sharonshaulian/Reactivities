@@ -7,12 +7,8 @@ import ActivityStore from '../../../app/stores/activityStore';
 import {observer} from 'mobx-react-lite';
 
 
-interface IProps {
-}
 
-
-
-const ActivityDashboard: React.FC<IProps> = ({ }) => {
+const ActivityDashboard: React.FC = () => {
 
     const activityStore = useContext(ActivityStore);
 

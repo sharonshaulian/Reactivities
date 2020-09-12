@@ -28,8 +28,8 @@ const ActivityDetails: React.FC<IProps> = ({ }) => {
         </Card.Content>
         <Card.Content extra>
             <Button.Group widths={2}>
-                <Button basic color='blue' content='Edit' onClick={()=>{activityStore.editMode = true}}></Button>
-                <Button basic color='grey' content='Cancel' onClick={()=>{activityStore.selectedActivity = null; activityStore.editMode = false; }}></Button>
+                <Button basic color='blue' content='Edit' onClick={()=>{activityStore.handleOpenCreateForm(activityStore.selectedActivity)}}></Button>
+                <Button basic color='grey' content='Cancel' onClick={()=>{activityStore.handleFormCancellation()}}></Button>
             </Button.Group>
         </Card.Content>
       </Card>     

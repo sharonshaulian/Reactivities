@@ -1,16 +1,9 @@
-import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { IActivity } from '../models/activity';
 
 axios.defaults.baseURL = 'https://localhost:5001/api';
 
 const responseBody = (response: AxiosResponse) => response.data;
-
-const requestConfig: AxiosRequestConfig = {
-    headers: {
-        'Content-Type': 'application/json'
-    }
-} 
-
 
 
 const requests = {

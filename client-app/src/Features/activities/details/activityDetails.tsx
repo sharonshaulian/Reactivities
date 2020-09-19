@@ -1,38 +1,46 @@
-import React, { useContext } from 'react';
-import { IActivity } from '../../../app/models/activity';
-import { Card, Image, Button  } from 'semantic-ui-react';
+import React, { useContext, useEffect } from 'react';
+import { GridColumn, Grid  } from 'semantic-ui-react';
 import ActivityStore from '../../../app/stores/activityStore';
 import {observer} from 'mobx-react-lite';
+import { RouteComponentProps } from 'react-router-dom';
+import LoadingComponent from '../../loadingComponent/loadingComponent';
+import { ActivityDetailsHeader } from './activityDetailsHeader';
+import ActivityDetailsInfo from './activityDetailsInfo';
+import { ActivityDetailsChat } from './activityDetailsChat';
+import { ActivityDetailsSidebar } from './activityDetailsSidebar';
 
 interface IProps {
     //setEditMode: (isEditMode: boolean) => void;
+    id: string;
 }
 
 
 
-const ActivityDetails: React.FC<IProps> = ({ }) => {
+const ActivityDetails: React.FC<RouteComponentProps<IProps>> = ({match, history}) => {
 
   const activityStore = useContext(ActivityStore);
 
+  useEffect(() => {
+    activityStore.loadActivity(match.params.id);
+  }, [activityStore, match.params.id]);
+
+  
+    if (activityStore.initialLoading || !activityStore.selectedActivity) return (<LoadingComponent isInverted={true} content='Loading Activities ...'/>);
+
     return (
-        <Card fluid>
-        <Image src={`/assets/categoryImages/${activityStore.selectedActivity?.category}.jpg`} wrapped ui={false} />
-        <Card.Content>
-          <Card.Header>{activityStore.selectedActivity?.title}</Card.Header>
-          <Card.Meta>
-            <span>{activityStore.selectedActivity?.date}</span>
-          </Card.Meta>
-          <Card.Description>
-            {activityStore.selectedActivity?.description}
-          </Card.Description>
-        </Card.Content>
-        <Card.Content extra>
-            <Button.Group widths={2}>
-                <Button basic color='blue' content='Edit' onClick={()=>{activityStore.handleOpenCreateForm(activityStore.selectedActivity)}}></Button>
-                <Button basic color='grey' content='Cancel' onClick={()=>{activityStore.handleFormCancellation()}}></Button>
-            </Button.Group>
-        </Card.Content>
-      </Card>     
+      <Grid>
+        <GridColumn width={10}>
+          <ActivityDetailsHeader activity={activityStore.selectedActivity!} />
+          <ActivityDetailsInfo activity={activityStore.selectedActivity!} />
+          <ActivityDetailsChat />
+        </GridColumn>
+        <GridColumn width={6}>
+          <ActivityDetailsSidebar/>
+        </GridColumn>
+
+
+
+      </Grid>
     );
 
 }

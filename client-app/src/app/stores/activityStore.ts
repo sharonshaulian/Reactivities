@@ -32,8 +32,6 @@ class ActivityStore {
           return resultArr;
         },{} as IActivityListGroupedByDate));
 
-        console.log(result);
-
         return result;
 
     }
@@ -90,6 +88,7 @@ class ActivityStore {
         catch (err) {
           console.log(err);
           runInAction(()=>{
+            //throw err;
             this.selectedActivity = null;
           });
         }

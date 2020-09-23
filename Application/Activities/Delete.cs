@@ -1,7 +1,9 @@
-﻿using MediatR;
+﻿using Application.Errors;
+using MediatR;
 using Persistence;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,7 +31,7 @@ namespace Application.Activities
                 var deleteActivity = await _context.Activities.FindAsync(request.Id);
 
                 if (deleteActivity == null)
-                    throw new Exception("Could not find activity");
+                    throw new RestException(HttpStatusCode.NotFound, new { activity = "Not Found" });
 
                 _context.Activities.Remove(deleteActivity);
                 var success = await _context.SaveChangesAsync() > 0;

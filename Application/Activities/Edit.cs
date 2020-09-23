@@ -1,8 +1,11 @@
-﻿using Domain;
+﻿using Application.Errors;
+using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,6 +28,19 @@ namespace Application.Activities
         }
 
 
+        public class Commandvalidator : AbstractValidator<Command>
+        {
+            public Commandvalidator()
+            {
+                RuleFor(c => c.Title).NotEmpty();
+                RuleFor(c => c.Description).NotEmpty();
+                RuleFor(c => c.Category).NotEmpty();
+                RuleFor(c => c.Date).NotEmpty();
+                RuleFor(c => c.City).NotEmpty();
+                RuleFor(c => c.Venue).NotEmpty();
+            }
+        }
+
         public class Handelr : IRequestHandler<Command>
         {
             private readonly DataContext _context;
@@ -41,7 +57,7 @@ namespace Application.Activities
                 var editActivity = await _context.Activities.FindAsync(request.Id);
 
                 if (editActivity == null)
-                    throw new Exception("Could not find activity");
+                    throw new RestException(HttpStatusCode.NotFound, new { activity = "Not Found" });
 
                 editActivity.Title = request.Title ?? editActivity.Title;
                 editActivity.Description = request.Description ?? editActivity.Description;

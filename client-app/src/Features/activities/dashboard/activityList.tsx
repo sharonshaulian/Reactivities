@@ -1,8 +1,7 @@
-import { Item, Button, Label, Segment } from 'semantic-ui-react';
+import { Item,  Label } from 'semantic-ui-react';
 import React, { useContext, Fragment } from 'react';
 import ActivityStore from '../../../app/stores/activityStore';
 import {observer} from 'mobx-react-lite';
-import { Link } from 'react-router-dom';
 import ActivityItem from './activityItem';
 
 

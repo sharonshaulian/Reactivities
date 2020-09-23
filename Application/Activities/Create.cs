@@ -1,4 +1,5 @@
 ﻿using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 using System;
@@ -24,6 +25,21 @@ namespace Application.Activities
         }
 
 
+        public class Commandvalidator : AbstractValidator<Command>
+        {
+            public Commandvalidator()
+            {
+                RuleFor(c => c.Title).NotEmpty();
+                RuleFor(c => c.Description).NotEmpty();
+                RuleFor(c => c.Category).NotEmpty();
+                RuleFor(c => c.Date).NotEmpty();
+                RuleFor(c => c.City).NotEmpty();
+                RuleFor(c => c.Venue).NotEmpty();
+            }
+        }
+
+
+
         public class Handelr : IRequestHandler<Command>
         {
             private readonly DataContext _context;
@@ -32,7 +48,6 @@ namespace Application.Activities
             {
                 _context = context;
             }
-
 
 
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)

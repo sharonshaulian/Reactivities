@@ -25,7 +25,9 @@ const ActivityDetails: React.FC<RouteComponentProps<IProps>> = ({match, history}
   }, [activityStore, match.params.id]);
 
   
-    if (activityStore.initialLoading || !activityStore.selectedActivity) return (<LoadingComponent isInverted={true} content='Loading Activities ...'/>);
+  if (activityStore.initialLoading) return <LoadingComponent content='Loading activity...' />;
+
+  if (!activityStore.selectedActivity) return <h2>Activity not found</h2>;
 
     return (
       <Grid>
@@ -37,9 +39,6 @@ const ActivityDetails: React.FC<RouteComponentProps<IProps>> = ({match, history}
         <GridColumn width={6}>
           <ActivityDetailsSidebar/>
         </GridColumn>
-
-
-
       </Grid>
     );
 

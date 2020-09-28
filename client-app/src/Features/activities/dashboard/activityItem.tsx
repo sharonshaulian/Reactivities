@@ -3,6 +3,7 @@ import { Item, Button, Segment, Icon } from 'semantic-ui-react'
 import { Link } from 'react-router-dom'
 import { IActivity } from '../../../app/models/activity'
 import { observer } from 'mobx-react-lite'
+import Helpers from '../../../app/helpers/dist/helpers'
 
 
 interface IProps {
@@ -32,7 +33,7 @@ const ActivityItem: React.FC<IProps> = ({activity}) => {
             
             </Segment>
             <Segment>
-                <Icon name='clock' /> {activity.date}
+                <Icon name='clock' /> {activity.date!.toString()}
                 <Icon name='marker' /> {activity.venue}, {activity.city}
             </Segment>
 

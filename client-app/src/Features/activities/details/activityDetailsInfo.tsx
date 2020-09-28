@@ -21,7 +21,7 @@ const ActivityDetailesInfo: React.FC<{activity: IActivity}> = ({activity}) => {
             <Icon name='calendar' size='large' color='teal' />
           </Grid.Column>
           <Grid.Column width={15}>
-            <span>{activity.date}</span>
+            <span>date here !</span>
           </Grid.Column>
         </Grid>
       </Segment>

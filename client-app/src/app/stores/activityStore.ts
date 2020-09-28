@@ -3,6 +3,8 @@ import {observable, action, computed, configure, runInAction} from 'mobx';
 import { IActivity } from "../models/activity";
 import agent from "../api/agent";
 import { v4 as uuid } from 'uuid';
+import { toast } from "react-toastify";
+import Helpers from "../helpers/helpers";
 
 
 configure({enforceActions: "always"});
@@ -27,8 +29,9 @@ class ActivityStore {
 
 
         const result = Object.entries(this.activityListByDate().reduce((resultArr, item)=>{
-          let date = item.date.split('T')[0];
-          resultArr[date] = resultArr[date] ? [...resultArr[date], item] : [item];
+          let date = new Date(item.date!);
+          let dateString = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`;
+          resultArr[dateString] = resultArr[dateString] ? [...resultArr[dateString], item] : [item];
           return resultArr;
         },{} as IActivityListGroupedByDate));
 
@@ -37,7 +40,7 @@ class ActivityStore {
     }
 
     activityListByDate = () : IActivity[] => {
-      return Array.from(this.activityRegistry.values()).sort( (a, b) => { return Date.parse(a.date) - Date.parse(b.date); });
+      return Array.from(this.activityRegistry.values()).sort( (a, b) => { return new Date(a.date!).getTime() - new Date(b.date!).getTime(); });
     }
 
 
@@ -50,7 +53,8 @@ class ActivityStore {
           runInAction(()=>{
             res.forEach(activity => 
               { 
-                activity.date = activity.date.split('.')[0];
+                //activity.date = new Date(activity.date!) //.split('.')[0];
+                activity.date = Helpers.toLocalDate(new Date(activity.date!).toISOString());
                 this.activityRegistry.set(activity.id, activity);
               });
           });
@@ -66,15 +70,11 @@ class ActivityStore {
     }
 
     @action loadActivity = async (id: string) => {
-      if (!id) {
-        this.selectedActivity = null;
-        return;
-      }
-
-      let result: IActivity | null = this.activityRegistry.get(id) || null;
+      let result = this.activityRegistry.get(id);
       if (result)
       {
         this.selectedActivity = result;
+        return result;
       }
       else
       {
@@ -82,8 +82,11 @@ class ActivityStore {
         try {
           result = await agent.Activities.details(id);
           runInAction(()=>{
-            this.selectedActivity = result;
+            result!.date = Helpers.toLocalDate(new Date(result!.date!).toISOString());
+            this.selectedActivity = result!;
+            this.activityRegistry.set(result!.id, result!);
           });
+          return result;
         }
         catch (err) {
           console.log(err);
@@ -138,15 +141,23 @@ class ActivityStore {
     @action handleCreateActivity = async (activity: IActivity) => {
       this.isFormSubmit = true;        
       
-      agent.Activities.create(activity).then(()=> {
+
+      try {
+        await agent.Activities.create(activity);
         runInAction(()=>{
           this.activityRegistry.set(activity.id, activity);
           this.selectedActivity = activity;
-          this.editMode = false;
-          this.isFormSubmit = false;          
         });
-      });
-
+      }
+      catch (err) {
+        console.log(err);
+      }
+      finally {
+        runInAction(()=>{
+          //this.editMode = false;
+          this.isFormSubmit = false;        
+        });
+      }
     }
 
     @action handleEditActivity = async (activity: IActivity) => {
@@ -160,6 +171,7 @@ class ActivityStore {
         });
       }
       catch (err) {
+        toast("Problem submitting data...")
         console.log(err);
       }
       finally {

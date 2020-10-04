@@ -52,28 +52,24 @@ namespace Application.User
                 var user = await _userManager.FindByEmailAsync(request.Email);
 
                 if (user == null)
-                    throw new RestException(System.Net.HttpStatusCode.Unauthorized, new { });
+                    throw new RestException(System.Net.HttpStatusCode.Unauthorized, new { statusText = "Unauthorized" });
 
                 var loginResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, false);
-                
+
                 if (loginResult.Succeeded)
                 {
                     return new User()
                     {
-                        DisplayName = user.DisplayName,
+                        Displayname = user.DisplayName,
                         Username = user.UserName,
                         Token = _jwtGenerator.CreateToken(user),
-                        Image = "this will be our image"
+                        Image = null
                     };
                 }
 
-                throw new RestException(System.Net.HttpStatusCode.Unauthorized, new { });
+                throw new RestException(System.Net.HttpStatusCode.Unauthorized, new { statusText = "Unauthorized" });
             }
         }
-
-
-
-
-
     }
 }
+

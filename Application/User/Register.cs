@@ -61,10 +61,10 @@ namespace Application.User
             {
 
                 if (await _context.Users.AnyAsync(u => u.Email.ToLower() == request.Email.ToLower()))
-                    throw new RestException(HttpStatusCode.BadRequest, new { Email = "email already taken" });
+                    throw new RestException(HttpStatusCode.BadRequest, new { statusText = "email already taken" });
 
                 if (await _context.Users.AnyAsync(u => u.UserName.ToLower() == request.UserName.ToLower()))
-                    throw new RestException(HttpStatusCode.BadRequest, new { Username = "username already taken" });
+                    throw new RestException(HttpStatusCode.BadRequest, new { statusText = "username already taken" });
 
                 var user = new AppUser()
                 {
@@ -79,7 +79,7 @@ namespace Application.User
                 {
                     var userResult = new User()
                     {
-                        DisplayName = user.DisplayName,
+                        Displayname = user.DisplayName,
                         Username = user.UserName,
                         Token = _jwtGenerator.CreateToken(user),
                         Image = null

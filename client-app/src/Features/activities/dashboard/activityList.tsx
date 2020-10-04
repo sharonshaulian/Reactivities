@@ -1,13 +1,15 @@
 import { Item,  Label } from 'semantic-ui-react';
 import React, { useContext, Fragment } from 'react';
-import ActivityStore from '../../../app/stores/activityStore';
 import {observer} from 'mobx-react-lite';
 import ActivityItem from './activityItem';
+import { RootStoreContext } from '../../../app/stores/rootStore';
+import { format } from 'date-fns';
 
 
 const ActivityList: React.FC = () => {
 
-    const activityStore = useContext(ActivityStore);
+    const rootStore = useContext(RootStoreContext);
+    const {activityStore} = rootStore;
 
     return (
 
@@ -15,7 +17,8 @@ const ActivityList: React.FC = () => {
         {activityStore.activityListGroupedByDate.map(([date, activities])=>(
             <Fragment key={date}>
                 <Label size='large' color='blue'>
-                    {date}
+                    { format(activities[0].date!, 'eeee do MMMM, YYYY') }
+                    
                 </Label>
                     <Item.Group divided>
                         {activities.map((a)=>(

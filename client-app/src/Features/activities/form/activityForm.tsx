@@ -11,6 +11,7 @@ import { SelectInput } from '../../../app/common/form/selectInput';
 import { category } from '../../../app/common/options/categoryOptions';
 import { DateInput } from '../../../app/common/form/dateInput';
 import { combineValidators, composeValidators, hasLengthGreaterThan, isRequired } from 'revalidate'
+import { RootStoreContext } from '../../../app/stores/rootStore';
 
 const validate = combineValidators({
     
@@ -44,7 +45,9 @@ interface IProps {
 
 const ActivityForm: React.FC<RouteChildrenProps<IProps>> = ({match, history}) => {
 
-    const activityStore = useContext(ActivityStore);
+    const rootStore = useContext(RootStoreContext);
+    const {activityStore} = rootStore;
+    
     const {
         isFormSubmit,
         clearActivity

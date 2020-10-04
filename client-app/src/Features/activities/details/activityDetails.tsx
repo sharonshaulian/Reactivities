@@ -8,6 +8,7 @@ import { ActivityDetailsHeader } from './activityDetailsHeader';
 import ActivityDetailsInfo from './activityDetailsInfo';
 import { ActivityDetailsChat } from './activityDetailsChat';
 import { ActivityDetailsSidebar } from './activityDetailsSidebar';
+import { RootStoreContext } from '../../../app/stores/rootStore';
 
 interface IProps {
     //setEditMode: (isEditMode: boolean) => void;
@@ -18,7 +19,8 @@ interface IProps {
 
 const ActivityDetails: React.FC<RouteComponentProps<IProps>> = ({match, history}) => {
 
-  const activityStore = useContext(ActivityStore);
+  const rootStore = useContext(RootStoreContext);
+  const {activityStore} = rootStore;
 
   useEffect(() => {
     activityStore.loadActivity(match.params.id);

@@ -1,10 +1,10 @@
-import { createContext } from "react";
 import {observable, action, computed, configure, runInAction} from 'mobx';
 import { IActivity } from "../models/activity";
 import agent from "../api/agent";
 import { v4 as uuid } from 'uuid';
 import { toast } from "react-toastify";
 import Helpers from "../helpers/helpers";
+import { RootStore } from "./rootStore";
 
 
 configure({enforceActions: "always"});
@@ -15,7 +15,11 @@ interface IActivityListGroupedByDate {
 }
 
 
-class ActivityStore { 
+export default class ActivityStore { 
+    rootStore: RootStore;
+    constructor (rootStore: RootStore) {
+      this.rootStore = rootStore;
+    }
     
     @observable activityRegistry = new Map<string,IActivity>();
     @observable initialLoading = true;
@@ -25,9 +29,6 @@ class ActivityStore {
     @observable isFormSubmit: boolean = false;
 
     @computed get activityListGroupedByDate() {
-
-
-
         const result = Object.entries(this.activityListByDate().reduce((resultArr, item)=>{
           let date = new Date(item.date!);
           let dateString = `${date.getDate()}/${date.getMonth()+1}/${date.getFullYear()}`;
@@ -206,4 +207,3 @@ class ActivityStore {
 
 }
 
-export default createContext(new ActivityStore());

@@ -1,6 +1,8 @@
-﻿using Domain;
+﻿using Application.Interfaces;
+using Domain;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 using System;
 using System.Collections.Generic;
@@ -43,15 +45,18 @@ namespace Application.Activities
         public class Handelr : IRequestHandler<Command>
         {
             private readonly DataContext _context;
+            private readonly IUserAccessor _userAccessor;
 
-            public Handelr(DataContext context)
+            public Handelr(DataContext context, IUserAccessor userAccessor)
             {
                 _context = context;
+                _userAccessor = userAccessor;
             }
 
 
             public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
+                //
                 var newActivity = new Activity()
                 {
                     Id = request.Id,
@@ -62,8 +67,21 @@ namespace Application.Activities
                     City = request.City,
                     Venue = request.Venue
                 };
-
+                
                 _context.Activities.Add(newActivity);
+
+                //
+                var user = await _context.Users.SingleOrDefaultAsync(u => u.UserName == _userAccessor.GetCurrentUser());
+                var atendee = new UserActivity()
+                {
+                    AppUser = user,
+                    Activity = newActivity,
+                    IsHost = true,
+                    DateJoined = DateTime.Now
+                };
+
+                _context.UserActivities.Add(atendee);
+
                 var success = await _context.SaveChangesAsync() > 0;
                 if (success)
                     return Unit.Value;
